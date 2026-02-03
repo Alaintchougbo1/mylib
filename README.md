@@ -109,9 +109,27 @@ openssl pkey -in config/jwt/private.pem -passin pass:your-jwt-passphrase -out co
 php bin/console doctrine:migrations:migrate
 ```
 
-#### 7. (Optionnel) Charger des Données de Test
+#### 7. (Optionnel) Charger des Données de Test (Fixtures)
 
-Vous pouvez créer manuellement des utilisateurs et des livres via l'API ou créer des fixtures.
+Pour charger des données de démonstration (utilisateurs, livres, demandes) :
+
+```bash
+# Avec Docker
+docker-compose exec backend php bin/console doctrine:fixtures:load
+
+# Sans Docker
+php bin/console doctrine:fixtures:load
+```
+
+**⚠️ Attention** : Cette commande supprimera toutes les données existantes et les remplacera par les données de test.
+
+Les fixtures créent automatiquement :
+- **3 utilisateurs** :
+  - Admin : `admin@library.com` / `admin123456` (ROLE_ADMIN)
+  - User1 : `user1@test.com` / `pass123456` (ROLE_USER)
+  - User2 : `user2@test.com` / `pass123456` (ROLE_USER)
+- **12 livres** de programmation (Clean Code, Design Patterns, etc.)
+- **5 demandes d'emprunt** avec différents statuts (en_attente, approuvee, refusee, retournee)
 
 ## 📡 API Endpoints
 
