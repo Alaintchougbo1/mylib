@@ -4,6 +4,7 @@
 *.tmp
 .idea/
 .vscode/
+.claude/
 *.swp
 *.swo
 *~
@@ -15,8 +16,8 @@
 
 # === BACKEND (Symfony) ===
 backend/.env
+backend/.env.*
 backend/.env.local
-backend/.env.*.local
 backend/var/
 backend/vendor/
 backend/public/bundles/
