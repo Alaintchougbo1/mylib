@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # Base de données MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: library_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: library_db
+      MYSQL_USER: library_user
+      MYSQL_PASSWORD: library_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - library_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Backend Symfony
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: library_backend
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./backend:/var/www/html
+      - backend_vendor:/var/www/html/vendor
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: mysql://library_user:library_password@mysql:3306/library_db?serverVersion=8.0
+      JWT_SECRET_KEY: '%kernel.project_dir%/config/jwt/private.pem'
+      JWT_PUBLIC_KEY: '%kernel.project_dir%/config/jwt/public.pem'
+      JWT_PASSPHRASE: 'your-jwt-passphrase'
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - library_network
+    command: symfony server:start --no-tls --port=8000
+
+  # Frontend Next.js
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: library_frontend
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api
+    depends_on:
+      - backend
+    networks:
+      - library_network
+    command: npm run dev
+
+  # phpMyAdmin (optionnel, pour la gestion de la base de données)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: library_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: library_user
+      PMA_PASSWORD: library_password
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - library_network
+
+volumes:
+  mysql_data:
+    driver: local
+  backend_vendor:
+    driver: local
+  frontend_node_modules:
+    driver: local
+
+networks:
+  library_network:
+    driver: bridge
