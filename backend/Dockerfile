@@ -35,4 +35,4 @@ RUN if [ -f composer.json ]; then composer install --no-interaction --optimize-a
 EXPOSE 8000
 
 # Commande par défaut
-CMD ["symfony", "server:start", "--no-tls", "--port=8000"]
+CMD ["symfony", "server:start", "--no-tls", "--port=8000", "--allow-all-ip"]

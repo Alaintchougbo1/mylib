@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 import api from '@/services/api';
 import { User } from '@/types';
 
@@ -21,13 +22,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = Cookies.get('token');
     if (token) {
       api.getMe().then((userData) => {
         setUser(userData);
         setLoading(false);
       }).catch(() => {
-        localStorage.removeItem('token');
+        Cookies.remove('token');
         setLoading(false);
       });
     } else {
@@ -36,18 +37,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
+    console.log('Login attempt for:', email);
     const data = await api.login(email, password);
-    localStorage.setItem('token', data.token);
+    console.log('Login successful, data:', data);
+
+    Cookies.set('token', data.token, { expires: 7, sameSite: 'lax' });
     setUser(data.user);
-    if (data.user.role === 'ROLE_ADMIN') {
-      router.push('/admin');
-    } else {
-      router.push('/livres');
-    }
+
+    const redirectUrl = data.user.role === 'ROLE_ADMIN' ? '/admin' : '/livres';
+    console.log('Redirecting to:', redirectUrl);
+
+    // Forcer la redirection avec un léger délai pour s'assurer que tout est sauvegardé
+    setTimeout(() => {
+      window.location.href = redirectUrl;
+    }, 100);
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    Cookies.remove('token');
     setUser(null);
     router.push('/login');
   };

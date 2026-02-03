@@ -42,7 +42,7 @@ class AuthService
         $user->setEmail($registerDTO->email);
         $user->setNom($registerDTO->nom);
         $user->setPrenom($registerDTO->prenom);
-        $user->setRole('ROLE_USER'); // Par défaut, tout nouvel utilisateur est ROLE_USER
+        $user->setRole($registerDTO->role); // Utilise le rôle du DTO (par défaut ROLE_USER)
 
         // Hasher le mot de passe
         $hashedPassword = $this->passwordHasher->hashPassword($user, $registerDTO->password);

@@ -45,7 +45,7 @@ services:
         condition: service_healthy
     networks:
       - library_network
-    command: symfony server:start --no-tls --port=8000
+    command: symfony server:start --no-tls --port=8000 --allow-all-ip
 
   # Frontend Next.js
   frontend:

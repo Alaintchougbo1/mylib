@@ -26,4 +26,7 @@ class RegisterDTO
     #[Assert\NotBlank(message: 'Le prénom est obligatoire')]
     #[Assert\Length(max: 100, maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères')]
     public string $prenom;
+
+    #[Assert\Choice(choices: ['ROLE_USER', 'ROLE_ADMIN'], message: 'Le rôle doit être ROLE_USER ou ROLE_ADMIN')]
+    public string $role = 'ROLE_USER';
 }

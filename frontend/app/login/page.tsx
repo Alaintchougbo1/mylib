@@ -18,8 +18,11 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-    } catch (err) {
-      setError('Identifiants incorrects');
+      // La redirection est gérée par le AuthContext
+    } catch (err: any) {
+      console.error('Erreur de connexion:', err);
+      const errorMessage = err?.response?.data?.error || err?.message || 'Identifiants incorrects';
+      setError(errorMessage);
       setLoading(false);
     }
   };

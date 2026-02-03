@@ -29,7 +29,7 @@ final class Version20260203000003 extends AbstractMigration
             commentaire LONGTEXT DEFAULT NULL,
             created_at DATETIME NOT NULL,
             updated_at DATETIME NOT NULL,
-            INDEX IDX_BD940CBB A76ED395 (user_id),
+            INDEX IDX_BD940CBBA76ED395 (user_id),
             INDEX IDX_BD940CBB37D925CB (livre_id),
             PRIMARY KEY(id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
