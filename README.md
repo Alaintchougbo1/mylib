@@ -1,412 +1,453 @@
 # Library Management System
 
-Système complet de gestion de bibliothèque en ligne avec backend Symfony (API REST) et frontend Next.js.
+> Un système moderne de gestion de bibliothèque développé dans le cadre d'un test technique. Ce projet met en œuvre une architecture full-stack complète avec API REST, authentification JWT, et interface utilisateur réactive.
 
-## 📚 Description
+## À propos du projet
 
-Ce projet est un système de gestion de bibliothèque permettant :
-- Aux **usagers** : consulter les livres disponibles et faire des demandes d'emprunt
-- Aux **administrateurs** : gérer les livres, les utilisateurs et les demandes d'emprunt
+Ce système permet de gérer efficacement une bibliothèque en ligne avec deux types d'utilisateurs distincts :
 
-## 🛠️ Technologies Utilisées
+- **Usagers** : Peuvent parcourir le catalogue, rechercher des livres et soumettre des demandes d'emprunt
+- **Administrateurs** : Disposent d'un tableau de bord complet pour gérer les livres, les utilisateurs et valider les demandes
+
+Le projet a été conçu avec une attention particulière portée à la sécurité, la maintenabilité du code et l'expérience utilisateur.
+
+## Stack technique
 
 ### Backend
-- **Symfony 6.4** - Framework PHP
-- **Doctrine ORM** - Gestion de la base de données
-- **MySQL 8.0** - Base de données
-- **JWT (lexik/jwt-authentication-bundle)** - Authentification
-- **Nelmio API Doc Bundle** - Documentation Swagger
+- **Symfony 6.4** avec architecture en couches (Controller → Service → Repository → Entity)
+- **Doctrine ORM** pour l'abstraction de la base de données
+- **MySQL 8.0** comme SGBD
+- **JWT Authentication** via `lexik/jwt-authentication-bundle`
+- **Swagger/OpenAPI** pour la documentation interactive de l'API
 
 ### Frontend
-- **Next.js 14+** avec App Router
-- **TypeScript** - Typage statique
-- **React** - Bibliothèque UI
+- **Next.js 14+** avec App Router pour le routing moderne
+- **TypeScript** en mode strict pour la fiabilité du code
+- **React** avec hooks personnalisés pour la logique métier
+- **Tailwind CSS** pour le styling
 
-### DevOps
-- **Docker & Docker Compose** - Containerisation
-- **phpMyAdmin** - Administration de la base de données
+### Infrastructure
+- **Docker Compose** pour l'orchestration des services
+- **phpMyAdmin** pour l'administration visuelle de la base
 
-## 📁 Structure du Projet
+## Architecture du projet
 
 ```
-library-management-system/
-├── backend/                    # API Symfony
+mylib/
+├── backend/
 │   ├── src/
-│   │   ├── Controller/        # Controllers API
-│   │   ├── Entity/            # Entités Doctrine (User, Livre, Demande)
-│   │   ├── Repository/        # Repositories
-│   │   ├── Service/           # Logique métier
-│   │   ├── DTO/               # Data Transfer Objects
-│   │   ├── Exception/         # Exceptions custom
-│   │   └── Security/          # Configuration sécurité
+│   │   ├── Controller/      # Points d'entrée de l'API (thin controllers)
+│   │   ├── Service/         # Logique métier (business logic)
+│   │   ├── Repository/      # Accès aux données (custom queries)
+│   │   ├── Entity/          # Modèles de données Doctrine
+│   │   ├── DTO/             # Data Transfer Objects (validation I/O)
+│   │   ├── Security/        # Guards et voters pour l'autorisation
+│   │   └── Exception/       # Exceptions métier personnalisées
 │   ├── config/
-│   ├── migrations/
+│   ├── migrations/          # Versioning de la base de données
 │   └── ...
-├── frontend/                   # Application Next.js (à venir)
+├── frontend/
+│   ├── src/
+│   │   ├── app/            # Pages Next.js (App Router)
+│   │   ├── components/     # Composants UI réutilisables
+│   │   ├── services/       # Appels API (axios/fetch)
+│   │   ├── hooks/          # Hooks custom (useAuth, useFetch...)
+│   │   ├── context/        # Providers React (AuthContext)
+│   │   └── types/          # Définitions TypeScript
+│   └── ...
 ├── docker-compose.yml
 ├── .env.example
 └── README.md
 ```
 
-## 🚀 Installation
+## Installation et lancement
 
 ### Prérequis
 
-- **Docker** et **Docker Compose** installés
-- **PHP 8.2+** (pour développement local hors Docker)
-- **Composer** (pour développement local hors Docker)
-- **Node.js 20+** (pour le frontend)
+Assurez-vous d'avoir installé :
+- Docker & Docker Compose
+- (Optionnel) PHP 8.2+ et Composer pour le développement local
+- (Optionnel) Node.js 20+ pour le développement frontend
 
-### Étapes d'Installation
+### Installation rapide
 
-#### 1. Cloner le Dépôt
+1. **Cloner le projet**
+   ```bash
+   git clone https://github.com/votre-username/mylib.git
+   cd mylib
+   ```
 
-```bash
-git clone <url-du-repo>
-cd library-management-system
-```
+2. **Configuration de l'environnement**
+   ```bash
+   cp .env.example .env
+   # Éditez .env si nécessaire (ports, credentials MySQL, JWT passphrase)
+   ```
 
-#### 2. Configuration de l'Environnement
+3. **Démarrer les services avec Docker**
+   ```bash
+   docker-compose up -d
+   ```
+   Cela lance automatiquement :
+   - Backend Symfony → `http://localhost:8000`
+   - Frontend Next.js → `http://localhost:3000`
+   - MySQL → port `3306`
+   - phpMyAdmin → `http://localhost:8080`
 
-Copier le fichier `.env.example` :
+4. **Installer les dépendances backend**
+   ```bash
+   cd backend
+   composer install
+   ```
 
-```bash
-cp .env.example .env
-```
+5. **Générer les clés JWT**
+   ```bash
+   mkdir -p config/jwt
+   
+   # Générer la clé privée (vous serez invité à créer un passphrase)
+   openssl genpkey -out config/jwt/private.pem -aes256 -algorithm rsa -pkeyopt rsa_keygen_bits:4096
+   
+   # Générer la clé publique (vous devrez saisir le même passphrase)
+   openssl pkey -in config/jwt/private.pem -out config/jwt/public.pem -pubout
+   ```
+   
+    **Important** : Assurez-vous que le passphrase que vous créez correspond bien à la valeur de `JWT_PASSPHRASE` dans votre fichier `.env`.
 
-#### 3. Lancer Docker
+6. **Appliquer les migrations de base de données**
+   ```bash
+   php bin/console doctrine:migrations:migrate
+   ```
 
-```bash
-docker-compose up -d
-```
+7. **Charger les données de test (optionnel mais recommandé)**
+   ```bash
+   # Avec Docker
+   docker-compose exec backend php bin/console doctrine:fixtures:load
+   
+   # Ou en local
+   php bin/console doctrine:fixtures:load
+   ```
+   
+   Cette commande supprime toutes les données existantes.
+   
+   Les fixtures créent :
+   - **1 administrateur** : `admin@library.com` / `admin123456`
+   - **2 utilisateurs test** : `user1@test.com` / `pass123456` et `user2@test.com` / `pass123456`
+   - **12 livres** de programmation (Clean Code, Design Patterns, Refactoring, etc.)
+   - **5 demandes d'emprunt** avec différents statuts
 
-Cela démarre :
-- **MySQL** sur le port `3306`
-- **Backend Symfony** sur le port `8000`
-- **Frontend Next.js** sur le port `3000` (quand disponible)
-- **phpMyAdmin** sur le port `8080`
+8. **Accéder à l'application**
+   - Frontend : http://localhost:3000
+   - API Swagger : http://localhost:8000/api/doc
+   - phpMyAdmin : http://localhost:8080 (utilisateur: `library_user`, mot de passe: `library_password`)
 
-#### 4. Installer les Dépendances Backend
-
-```bash
-cd backend
-composer install
-```
-
-#### 5. Générer les Clés JWT
-
-```bash
-mkdir -p config/jwt
-openssl genpkey -out config/jwt/private.pem -aes256 -algorithm rsa -pkeyopt rsa_keygen_bits:4096 -pass pass:your-jwt-passphrase
-openssl pkey -in config/jwt/private.pem -passin pass:your-jwt-passphrase -out config/jwt/public.pem -pubout
-```
-
-**Note :** Assurez-vous que le passphrase correspond à `JWT_PASSPHRASE` dans votre `.env`.
-
-#### 6. Exécuter les Migrations
-
-```bash
-php bin/console doctrine:migrations:migrate
-```
-
-#### 7. (Optionnel) Charger des Données de Test (Fixtures)
-
-Pour charger des données de démonstration (utilisateurs, livres, demandes) :
-
-```bash
-# Avec Docker
-docker-compose exec backend php bin/console doctrine:fixtures:load
-
-# Sans Docker
-php bin/console doctrine:fixtures:load
-```
-
-**⚠️ Attention** : Cette commande supprimera toutes les données existantes et les remplacera par les données de test.
-
-Les fixtures créent automatiquement :
-- **3 utilisateurs** :
-  - Admin : `admin@library.com` / `admin123456` (ROLE_ADMIN)
-  - User1 : `user1@test.com` / `pass123456` (ROLE_USER)
-  - User2 : `user2@test.com` / `pass123456` (ROLE_USER)
-- **12 livres** de programmation (Clean Code, Design Patterns, etc.)
-- **5 demandes d'emprunt** avec différents statuts (en_attente, approuvee, refusee, retournee)
-
-## 📡 API Endpoints
+## Documentation de l'API
 
 ### Authentification
 
-| Méthode | Endpoint | Description | Accès |
-|---------|----------|-------------|-------|
-| POST | `/api/auth/register` | Inscription (ROLE_USER par défaut) | Public |
-| POST | `/api/auth/login` | Connexion | Public |
-| GET | `/api/auth/me` | Informations utilisateur connecté | Authentifié |
+L'API utilise JWT pour sécuriser les endpoints. Le workflow est simple :
 
-### Livres
+1. **S'inscrire** ou **se connecter** pour obtenir un token
+2. **Inclure le token** dans l'en-tête `Authorization: Bearer {token}` pour toutes les requêtes protégées
 
-| Méthode | Endpoint | Description | Accès |
-|---------|----------|-------------|-------|
-| GET | `/api/livres` | Liste des livres (filtres: titre, auteur, disponible) | Authentifié |
-| GET | `/api/livres/{id}` | Détails d'un livre | Authentifié |
-| POST | `/api/livres` | Créer un livre | ADMIN |
-| PUT | `/api/livres/{id}` | Modifier un livre | ADMIN |
-| DELETE | `/api/livres/{id}` | Supprimer un livre | ADMIN |
+#### Endpoints publics
 
-### Utilisateurs
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `POST` | `/api/auth/register` | Créer un nouveau compte utilisateur |
+| `POST` | `/api/auth/login` | Se connecter et obtenir un JWT |
 
-| Méthode | Endpoint | Description | Accès |
-|---------|----------|-------------|-------|
-| GET | `/api/utilisateurs` | Liste des utilisateurs | ADMIN |
-| GET | `/api/utilisateurs/{id}` | Détails d'un utilisateur | ADMIN |
-| POST | `/api/utilisateurs` | Créer un utilisateur | ADMIN |
-| PUT | `/api/utilisateurs/{id}` | Modifier un utilisateur | ADMIN |
-| DELETE | `/api/utilisateurs/{id}` | Supprimer un utilisateur | ADMIN |
+#### Endpoints authentifiés
 
-### Demandes d'Emprunt
+| Ressource | Méthode | Endpoint | Rôle requis | Description |
+|-----------|---------|----------|-------------|-------------|
+| **Profil** | `GET` | `/api/auth/me` | USER, ADMIN | Récupérer ses informations |
+| **Livres** | `GET` | `/api/livres` | USER, ADMIN | Lister les livres (avec filtres) |
+| | `GET` | `/api/livres/{id}` | USER, ADMIN | Détails d'un livre |
+| | `POST` | `/api/livres` | **ADMIN** | Ajouter un livre |
+| | `PUT` | `/api/livres/{id}` | **ADMIN** | Modifier un livre |
+| | `DELETE` | `/api/livres/{id}` | **ADMIN** | Supprimer un livre |
+| **Utilisateurs** | `GET` | `/api/utilisateurs` | **ADMIN** | Lister les utilisateurs |
+| | `GET` | `/api/utilisateurs/{id}` | **ADMIN** | Détails d'un utilisateur |
+| | `POST` | `/api/utilisateurs` | **ADMIN** | Créer un utilisateur |
+| | `PUT` | `/api/utilisateurs/{id}` | **ADMIN** | Modifier un utilisateur |
+| | `DELETE` | `/api/utilisateurs/{id}` | **ADMIN** | Supprimer un utilisateur |
+| **Demandes** | `GET` | `/api/demandes` | USER, ADMIN | Lister les demandes* |
+| | `GET` | `/api/demandes/{id}` | USER, ADMIN | Détails d'une demande |
+| | `POST` | `/api/demandes` | **USER** | Créer une demande d'emprunt |
+| | `PUT` | `/api/demandes/{id}` | **ADMIN** | Modifier le statut (approuver/refuser) |
+| | `DELETE` | `/api/demandes/{id}` | **ADMIN** | Supprimer une demande |
+| **Stats** | `GET` | `/api/statistiques` | **ADMIN** | Tableau de bord complet |
 
-| Méthode | Endpoint | Description | Accès |
-|---------|----------|-------------|-------|
-| GET | `/api/demandes` | Liste des demandes (USER: ses demandes, ADMIN: toutes) | Authentifié |
-| GET | `/api/demandes/{id}` | Détails d'une demande | Authentifié |
-| POST | `/api/demandes` | Créer une demande | USER |
-| PUT | `/api/demandes/{id}` | Modifier le statut d'une demande | ADMIN |
-| DELETE | `/api/demandes/{id}` | Supprimer une demande | ADMIN |
+\* *Les utilisateurs standard ne voient que leurs propres demandes, les admins voient tout*
 
-### Statistiques
+### Exemples d'utilisation
 
-| Méthode | Endpoint | Description | Accès |
-|---------|----------|-------------|-------|
-| GET | `/api/statistiques` | Statistiques de la bibliothèque | ADMIN |
+#### S'inscrire
 
-## 📖 Documentation Swagger
-
-Une fois le backend démarré, accédez à la documentation Swagger interactive :
-
-```
-http://localhost:8000/api/doc
-```
-
-## 🔐 Authentification
-
-L'API utilise **JWT (JSON Web Tokens)** pour l'authentification.
-
-### Flux d'Authentification
-
-1. **Inscription** : `POST /api/auth/register`
-   ```json
-   {
-     "email": "user@example.com",
-     "password": "password123",
-     "nom": "Dupont",
-     "prenom": "Jean"
-   }
-   ```
-
-2. **Connexion** : `POST /api/auth/login`
-   ```json
-   {
-     "email": "user@example.com",
-     "password": "password123"
-   }
-   ```
-
-   Réponse :
-   ```json
-   {
-     "token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
-     "user": { ... }
-   }
-   ```
-
-3. **Utiliser le Token**
-
-   Ajoutez le token dans l'en-tête `Authorization` de chaque requête :
-   ```
-   Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
-   ```
-
-## 👥 Rôles et Permissions
-
-- **ROLE_USER** (Usager)
-  - Consulter les livres
-  - Créer des demandes d'emprunt
-  - Consulter ses propres demandes
-
-- **ROLE_ADMIN** (Administrateur)
-  - Toutes les permissions de ROLE_USER
-  - Gérer les livres (CRUD)
-  - Gérer les utilisateurs (CRUD)
-  - Approuver/refuser les demandes
-  - Consulter les statistiques
-
-## 💾 Base de Données
-
-### Entités
-
-#### User
-- `id`, `email` (unique), `password` (hashé), `nom`, `prenom`
-- `role` : `ROLE_USER` | `ROLE_ADMIN`
-- `created_at`, `updated_at`
-
-#### Livre
-- `id`, `titre`, `auteur`, `isbn` (unique, nullable)
-- `description` (nullable), `disponible` (boolean)
-- `created_at`, `updated_at`
-
-#### Demande
-- `id`, `user_id` (FK), `livre_id` (FK)
-- `statut` : `en_attente` | `approuvee` | `refusee` | `retournee`
-- `date_demande`, `date_retour` (nullable), `commentaire` (nullable)
-- `created_at`, `updated_at`
-
-### Logique de Disponibilité
-
-- Quand une demande est **approuvée** → le livre devient **non disponible**
-- Quand une demande passe à **retournée** → le livre redevient **disponible**
-- Quand une demande approuvée est **refusée** ou **supprimée** → le livre redevient **disponible**
-
-## 🧪 Tests
-
-### Tester l'API avec cURL
-
-#### Inscription
 ```bash
 curl -X POST http://localhost:8000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "admin@library.com",
-    "password": "admin123",
-    "nom": "Admin",
-    "prenom": "Super"
+    "email": "john.doe@example.com",
+    "password": "SecurePass123!",
+    "nom": "Doe",
+    "prenom": "John"
   }'
 ```
 
-#### Connexion
+#### Se connecter
+
 ```bash
 curl -X POST http://localhost:8000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "admin@library.com",
-    "password": "admin123"
+    "email": "john.doe@example.com",
+    "password": "SecurePass123!"
   }'
 ```
 
-#### Récupérer les Livres
+Réponse :
+```json
+{
+  "token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+  "user": {
+    "id": 1,
+    "email": "john.doe@example.com",
+    "nom": "Doe",
+    "prenom": "John",
+    "role": "ROLE_USER"
+  }
+}
+```
+
+#### Rechercher des livres
+
 ```bash
-curl -X GET http://localhost:8000/api/livres \
+curl -X GET "http://localhost:8000/api/livres?titre=clean&disponible=true" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
-## 🐳 Commandes Docker Utiles
+La documentation complète et interactive est disponible sur **http://localhost:8000/api/doc** (Swagger UI).
+
+## Modèle de données
+
+### Entités principales
+
+#### User
+Représente un utilisateur du système (usager ou administrateur).
+
+```php
+- id: int (auto)
+- email: string (unique, requis)
+- password: string (hashé avec bcrypt)
+- nom: string
+- prenom: string
+- role: enum('ROLE_USER', 'ROLE_ADMIN')
+- created_at: datetime
+- updated_at: datetime
+```
+
+#### Livre
+Représente un ouvrage de la bibliothèque.
+
+```php
+- id: int (auto)
+- titre: string (requis)
+- auteur: string (requis)
+- isbn: string (unique, optionnel)
+- description: text (optionnel)
+- disponible: boolean (défaut: true)
+- created_at: datetime
+- updated_at: datetime
+```
+
+#### Demande
+Représente une demande d'emprunt faite par un utilisateur.
+
+```php
+- id: int (auto)
+- user: User (ManyToOne)
+- livre: Livre (ManyToOne)
+- statut: enum('en_attente', 'approuvee', 'refusee', 'retournee')
+- date_demande: datetime (auto)
+- date_retour: datetime (optionnel)
+- commentaire: text (optionnel)
+- created_at: datetime
+- updated_at: datetime
+```
+
+### Règles métier
+
+La disponibilité des livres est gérée automatiquement :
+
+1. **Demande approuvée** → `livre.disponible = false`
+2. **Demande marquée comme retournée** → `livre.disponible = true`
+3. **Demande approuvée puis refusée/supprimée** → `livre.disponible = true`
+
+Ces règles sont implémentées dans `DemandeService` pour garantir la cohérence des données.
+
+## Sécurité et permissions
+
+### Rôles
+
+- **ROLE_USER** : Utilisateur standard (accès en lecture sur les livres, gestion de ses demandes)
+- **ROLE_ADMIN** : Administrateur (accès complet à toutes les ressources)
+
+### Protection des endpoints
+
+Les permissions sont appliquées au niveau des controllers Symfony via :
+- Attributs `#[IsGranted]`
+- Voters personnalisés pour les règles complexes
+- Validation des DTOs avec le composant Symfony Validator
+
+### Bonnes pratiques implémentées
+
+- Mots de passe hashés avec `PasswordHasher` (bcrypt)
+- Tokens JWT signés avec RS256 (clés RSA 4096 bits)
+- Validation stricte des données d'entrée
+- DTOs pour éviter l'exposition directe des entités
+- CORS configuré pour autoriser uniquement le frontend
+
+## Tests et validation
+
+### Tester l'API manuellement
+
+La collection Swagger intégrée permet de tester tous les endpoints directement depuis votre navigateur : **http://localhost:8000/api/doc**
+
+### Tests automatisés (à venir)
+
+Le projet est structuré pour faciliter l'ajout de tests :
+- Tests unitaires avec PHPUnit (backend)
+- Tests d'intégration API avec API Platform Test Client
+- Tests E2E avec Playwright (frontend)
+
+## Commandes Docker utiles
 
 ```bash
-# Démarrer les services
+# Démarrer tous les services
 docker-compose up -d
 
-# Arrêter les services
+# Arrêter tous les services
 docker-compose down
 
-# Voir les logs
+# Voir les logs en temps réel
 docker-compose logs -f backend
+docker-compose logs -f frontend
 
-# Redémarrer un service
+# Redémarrer un service spécifique
 docker-compose restart backend
 
-# Accéder au conteneur backend
+# Accéder au shell d'un conteneur
 docker-compose exec backend bash
 
-# Reconstruire les images
+# Reconstruire les images après modification
 docker-compose build
+docker-compose up -d
 ```
 
-## 📊 Accès phpMyAdmin
+## Développement
 
-Pour gérer visuellement la base de données :
+### Standards de code
 
-```
-URL: http://localhost:8080
-Serveur: mysql
-Utilisateur: library_user
-Mot de passe: library_password
-```
+**Backend (PHP/Symfony)**
+- PSR-12 pour le style de code
+- Strict types activé (`declare(strict_types=1)`)
+- PHPDoc complet sur toutes les classes et méthodes
+- DTOs pour toutes les entrées/sorties API
+- Services injectés via autowiring
 
-## 🔧 Développement
-
-### Architecture
-
-Le backend suit une architecture en couches :
-
-1. **Controller** : Gestion des requêtes HTTP et validation
-2. **Service** : Logique métier
-3. **Repository** : Accès aux données
-4. **Entity** : Modèles de données
-5. **DTO** : Transfert de données (input/output)
-
-### Conventions de Code
-
-- **PSR-12** pour le style de code PHP
-- **Strict Types** activé dans tous les fichiers PHP
-- **DTOs** pour toutes les entrées/sorties API
-- **Documentation** PHPDoc pour toutes les classes et méthodes
-- **Messages de commit** conventionnels (feat, fix, docs, refactor, chore)
+**Frontend (TypeScript/React)**
+- Mode TypeScript strict (pas de `any`)
+- Hooks personnalisés pour la logique métier
+- Composants fonctionnels uniquement
+- Gestion d'état via Context API
+- Appels API centralisés dans `/services`
 
 ### Workflow Git
 
+Le projet suit un workflow Git structuré :
+
 ```
-main          ← Production (code final)
+main          ← Code production (stable)
   ↑
-staging       ← Tests/validation
+staging       ← Tests et validation
   ↑
-release       ← Préparation release
+release       ← Préparation des releases
   ↑
 feature       ← Intégration des features
   ↑
-feat/*        ← Développement
+feat/*        ← Développement de features individuelles
 ```
 
-## 📝 Identifiants de Test
+### Format des commits
 
-**Important :** Vous devez créer manuellement vos utilisateurs via l'API. Voici des exemples :
+Les commits suivent la convention [Conventional Commits](https://www.conventionalcommits.org/) :
 
-### Administrateur
-```json
-{
-  "email": "admin@library.com",
-  "password": "admin123",
-  "nom": "Admin",
-  "prenom": "Super",
-  "role": "ROLE_ADMIN"
-}
+```
+feat(livres): ajoute le filtrage par auteur
+fix(auth): corrige la validation du token expiré
+docs(readme): met à jour les instructions d'installation
+refactor(demandes): extrait la logique de disponibilité dans un service
+chore(docker): met à jour l'image MySQL vers 8.0.35
 ```
 
-### Usager
-```json
-{
-  "email": "user@library.com",
-  "password": "user123",
-  "nom": "Dupont",
-  "prenom": "Jean"
-}
+## Contribution
+
+Ce projet a été développé dans le cadre d'un test technique. Il n'accepte pas de contributions externes pour le moment.
+
+Si vous repérez un bug ou avez une suggestion, n'hésitez pas à ouvrir une issue sur GitHub.
+
+## Licence
+
+Ce projet est un travail personnel réalisé pour un test de recrutement.
+
+**Tous droits réservés** - Utilisation, reproduction ou distribution interdites sans autorisation.
+
+## Informations techniques supplémentaires
+
+### Versions des dépendances principales
+
+**Backend**
+- PHP 8.2+
+- Symfony 6.4.x
+- Doctrine ORM 2.x
+- lexik/jwt-authentication-bundle 2.x
+- nelmio/api-doc-bundle 4.x
+
+**Frontend**
+- Next.js 14.x
+- React 18.x
+- TypeScript 5.x
+- Tailwind CSS 3.x
+
+### Variables d'environnement
+
+Un fichier `.env.example` est fourni avec toutes les variables nécessaires. Les principales sont :
+
+```env
+# Base de données
+DATABASE_URL=mysql://user:password@mysql:3306/library_db
+
+# JWT
+JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
+JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
+JWT_PASSPHRASE=your-secure-passphrase
+
+# CORS
+CORS_ALLOW_ORIGIN=^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$
 ```
 
-## 🤝 Contribution
+### Limitations connues
 
-Ce projet est un test de recrutement personnel. Les contributions externes ne sont pas acceptées.
+- Les tokens JWT expirent après 1 heure (configurable dans `config/packages/lexik_jwt_authentication.yaml`)
+- Pas de système de refresh token implémenté (fonctionnalité future)
+- Les uploads de fichiers (couvertures de livres) ne sont pas encore supportés
 
-## 📄 Licence
+## Remerciements
 
-Projet personnel - Tous droits réservés
-
-## ⚠️ Notes Importantes
-
-- Les mots de passe sont hashés avec Symfony PasswordHasher (bcrypt)
-- Les tokens JWT expirent après 3600 secondes (1 heure)
-- La passphrase JWT par défaut est `your-jwt-passphrase` (à changer en production)
-- Les migrations doivent être exécutées avant le premier lancement
-
-## 📧 Contact
-
-Pour toute question concernant ce projet, veuillez créer une issue sur GitHub.
+Merci d'avoir pris le temps d'examiner ce projet. Il a été développé avec soin en respectant les meilleures pratiques de développement full-stack moderne.
 
 ---
 
-**Développé par Alain Tchougbo**
+**Développé par Alain Tchougbo** | [alain.tchougb@epitech.eu](mailto:alain.tchougb@epitech.eu)
+
+*Dernière mise à jour : Février 2026*

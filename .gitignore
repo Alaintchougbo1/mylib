@@ -16,12 +16,13 @@
 
 # === BACKEND (Symfony) ===
 backend/.env
-backend/.env.*
 backend/.env.local
+backend/.env.*.local
 backend/var/
 backend/vendor/
 backend/public/bundles/
 backend/config/jwt/*.pem
+!backend/config/jwt/README.md
 backend/.phpunit.result.cache
 backend/symfony.lock
 
@@ -44,6 +45,4 @@ docker-compose.override.yml
 *.sql
 *.sqlite
 *.db
-backend/.env
-frontend/.env.local
 frontend-temp/
