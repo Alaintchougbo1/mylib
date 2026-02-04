@@ -409,4 +409,4 @@ Pour toute question concernant ce projet, veuillez créer une issue sur GitHub.
 
 ---
 
-**Développé avec ❤️ par Claude Sonnet 4.5**
+**Développé par Alain Tchougbo**
