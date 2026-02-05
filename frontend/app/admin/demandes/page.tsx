@@ -1,90 +1,119 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Check, X } from 'lucide-react';
+import Sidebar from '@/components/ui/Sidebar';
+import Table from '@/components/ui/Table';
+import { StatusBadge } from '@/components/ui/Badge';
 import api from '@/services/api';
 import { Demande } from '@/types';
-import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
 
 export default function AdminDemandesPage() {
   const [demandes, setDemandes] = useState<Demande[]>([]);
-  const { logout } = useAuth();
 
   useEffect(() => {
     fetchDemandes();
   }, []);
 
   const fetchDemandes = async () => {
-    const data = await api.getDemandes();
-    setDemandes(data);
-  };
-
-  const handleChangeStatut = async (id: number, statut: string) => {
     try {
-      await api.updateDemande(id, { statut });
-      fetchDemandes();
-    } catch (err) {
-      alert('Erreur lors de la mise à jour');
+      const response = await api.get('/demandes');
+      setDemandes(response.data);
+    } catch (error) {
+      console.error('Erreur:', error);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm('Supprimer cette demande ?')) {
-      await api.deleteDemande(id);
+  const handleApprove = async (id: number) => {
+    try {
+      await api.put(`/demandes/${id}`, { statut: 'approuvee' });
       fetchDemandes();
+    } catch (error) {
+      alert('Erreur');
     }
   };
+
+  const handleReject = async (id: number) => {
+    try {
+      await api.put(`/demandes/${id}`, { statut: 'refusee' });
+      fetchDemandes();
+    } catch (error) {
+      alert('Erreur');
+    }
+  };
+
+  const handleReturn = async (id: number) => {
+    try {
+      await api.put(`/demandes/${id}`, { statut: 'retournee' });
+      fetchDemandes();
+    } catch (error) {
+      alert('Erreur');
+    }
+  };
+
+  const columns = [
+    {
+      key: 'user',
+      header: 'Utilisateur',
+      render: (d: Demande) => `${d.user.prenom} ${d.user.nom}`,
+    },
+    {
+      key: 'livre',
+      header: 'Livre',
+      render: (d: Demande) => d.livre.titre,
+    },
+    {
+      key: 'dateDemande',
+      header: 'Date',
+      render: (d: Demande) => new Date(d.dateDemande).toLocaleDateString('fr-FR'),
+    },
+    {
+      key: 'statut',
+      header: 'Statut',
+      render: (d: Demande) => <StatusBadge status={d.statut} />,
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="bg-white shadow rounded-lg p-6 mb-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">Gestion des Demandes</h1>
-            <div className="space-x-4">
-              <Link href="/admin" className="text-blue-600 hover:underline">Dashboard</Link>
-              <button onClick={logout} className="text-red-600 hover:underline">Déconnexion</button>
-            </div>
-          </div>
-        </div>
+    <div className="flex">
+      <Sidebar />
+      <div className="flex-1 ml-64 container-page">
+        <h1 className="text-4xl font-display font-bold mb-8">Gestion des demandes</h1>
 
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Utilisateur</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Livre</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {demandes.map((demande) => (
-                <tr key={demande.id}>
-                  <td className="px-6 py-4">{demande.user.prenom} {demande.user.nom}</td>
-                  <td className="px-6 py-4">{demande.livre.titre}</td>
-                  <td className="px-6 py-4">{new Date(demande.dateDemande).toLocaleDateString('fr-FR')}</td>
-                  <td className="px-6 py-4">
-                    <select
-                      value={demande.statut}
-                      onChange={(e) => handleChangeStatut(demande.id, e.target.value)}
-                      className="px-3 py-1 border rounded text-sm"
-                    >
-                      <option value="en_attente">En attente</option>
-                      <option value="approuvee">Approuvée</option>
-                      <option value="refusee">Refusée</option>
-                      <option value="retournee">Retournée</option>
-                    </select>
-                  </td>
-                  <td className="px-6 py-4">
-                    <button onClick={() => handleDelete(demande.id)} className="text-red-600 hover:underline">Supprimer</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table
+          data={demandes}
+          columns={columns}
+          actions={(demande) => (
+            <div className="flex gap-2">
+              {demande.statut === 'en_attente' && (
+                <>
+                  <button
+                    onClick={() => handleApprove(demande.id)}
+                    className="text-success hover:text-success/80"
+                    title="Approuver"
+                  >
+                    <Check className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handleReject(demande.id)}
+                    className="text-error hover:text-error/80"
+                    title="Refuser"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </>
+              )}
+              {demande.statut === 'approuvee' && (
+                <button
+                  onClick={() => handleReturn(demande.id)}
+                  className="text-info hover:text-info/80 text-sm"
+                >
+                  Marquer retourné
+                </button>
+              )}
+            </div>
+          )}
+        />
       </div>
     </div>
   );

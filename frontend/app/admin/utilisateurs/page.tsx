@@ -1,121 +1,154 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
+import Sidebar from '@/components/ui/Sidebar';
+import Table from '@/components/ui/Table';
+import Button from '@/components/ui/Button';
+import Modal from '@/components/ui/Modal';
+import Input from '@/components/ui/Input';
+import Badge from '@/components/ui/Badge';
 import api from '@/services/api';
 import { User } from '@/types';
-import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
 
 export default function AdminUtilisateursPage() {
-  const [utilisateurs, setUtilisateurs] = useState<User[]>([]);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [formData, setFormData] = useState({ email: '', password: '', nom: '', prenom: '', role: 'ROLE_USER' });
-  const { logout } = useAuth();
+  const [users, setUsers] = useState<User[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    nom: '',
+    prenom: '',
+    role: 'ROLE_USER',
+  });
 
   useEffect(() => {
-    fetchUtilisateurs();
+    fetchUsers();
   }, []);
 
-  const fetchUtilisateurs = async () => {
-    const data = await api.getUtilisateurs();
-    setUtilisateurs(data);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const fetchUsers = async () => {
     try {
-      if (editingId) {
-        const updateData: any = { email: formData.email, nom: formData.nom, prenom: formData.prenom, role: formData.role };
-        if (formData.password) updateData.password = formData.password;
-        await api.updateUtilisateur(editingId, updateData);
-      } else {
-        await api.createUtilisateur(formData);
-      }
-      setShowForm(false);
-      setEditingId(null);
-      setFormData({ email: '', password: '', nom: '', prenom: '', role: 'ROLE_USER' });
-      fetchUtilisateurs();
-    } catch (err) {
-      alert('Erreur lors de l\'enregistrement');
+      const response = await api.get('/utilisateurs');
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Erreur:', error);
     }
   };
 
-  const handleEdit = (user: User) => {
-    setEditingId(user.id);
-    setFormData({ email: user.email, password: '', nom: user.nom, prenom: user.prenom, role: user.role });
-    setShowForm(true);
+  const handleSubmit = async () => {
+    try {
+      await api.post('/utilisateurs', formData);
+      setModalOpen(false);
+      setFormData({ email: '', password: '', nom: '', prenom: '', role: 'ROLE_USER' });
+      fetchUsers();
+    } catch (error) {
+      alert('Erreur lors de la création');
+    }
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm('Supprimer cet utilisateur ?')) {
-      await api.deleteUtilisateur(id);
-      fetchUtilisateurs();
+    if (!confirm('Confirmer la suppression ?')) return;
+    try {
+      await api.delete(`/utilisateurs/${id}`);
+      fetchUsers();
+    } catch (error) {
+      alert('Erreur');
     }
   };
 
+  const columns = [
+    { key: 'prenom', header: 'Prénom' },
+    { key: 'nom', header: 'Nom' },
+    { key: 'email', header: 'Email' },
+    {
+      key: 'role',
+      header: 'Rôle',
+      render: (user: User) => (
+        <Badge variant={user.role === 'ROLE_ADMIN' ? 'info' : 'success'}>
+          {user.role === 'ROLE_ADMIN' ? 'Admin' : 'User'}
+        </Badge>
+      ),
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="bg-white shadow rounded-lg p-6 mb-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">Gestion des Utilisateurs</h1>
-            <div className="space-x-4">
-              <Link href="/admin" className="text-blue-600 hover:underline">Dashboard</Link>
-              <button onClick={() => { setShowForm(!showForm); setEditingId(null); setFormData({ email: '', password: '', nom: '', prenom: '', role: 'ROLE_USER' }); }} className="bg-green-600 text-white px-4 py-2 rounded">
-                {showForm ? 'Annuler' : 'Nouvel Utilisateur'}
-              </button>
-              <button onClick={logout} className="text-red-600 hover:underline">Déconnexion</button>
-            </div>
-          </div>
+    <div className="flex">
+      <Sidebar />
+      <div className="flex-1 ml-64 container-page">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-4xl font-display font-bold">Gestion des utilisateurs</h1>
+          <Button
+            onClick={() => setModalOpen(true)}
+            variant="primary"
+            icon={<Plus className="w-5 h-5" />}
+          >
+            Ajouter un utilisateur
+          </Button>
         </div>
 
-        {showForm && (
-          <div className="bg-white shadow rounded-lg p-6 mb-6">
-            <h2 className="text-xl font-bold mb-4">{editingId ? 'Modifier' : 'Nouvel'} Utilisateur</h2>
-            <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-              <input type="email" placeholder="Email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} required className="px-4 py-2 border rounded" />
-              <input type="password" placeholder={editingId ? 'Nouveau mot de passe (optionnel)' : 'Mot de passe'} value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} required={!editingId} className="px-4 py-2 border rounded" />
-              <input type="text" placeholder="Prénom" value={formData.prenom} onChange={(e) => setFormData({...formData, prenom: e.target.value})} required className="px-4 py-2 border rounded" />
-              <input type="text" placeholder="Nom" value={formData.nom} onChange={(e) => setFormData({...formData, nom: e.target.value})} required className="px-4 py-2 border rounded" />
-              <select value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})} className="px-4 py-2 border rounded col-span-2">
-                <option value="ROLE_USER">Usager</option>
+        <Table
+          data={users}
+          columns={columns}
+          actions={(user) => (
+            <button
+              onClick={() => handleDelete(user.id)}
+              className="text-error hover:text-error/80"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          )}
+        />
+
+        <Modal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          title="Ajouter un utilisateur"
+        >
+          <div className="space-y-4">
+            <Input
+              label="Email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              required
+            />
+            <Input
+              label="Mot de passe"
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              required
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="Prénom"
+                value={formData.prenom}
+                onChange={(e) => setFormData({ ...formData, prenom: e.target.value })}
+                required
+              />
+              <Input
+                label="Nom"
+                value={formData.nom}
+                onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label className="input-label">Rôle</label>
+              <select
+                className="input"
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+              >
+                <option value="ROLE_USER">Utilisateur</option>
                 <option value="ROLE_ADMIN">Administrateur</option>
               </select>
-              <button type="submit" className="col-span-2 bg-blue-600 text-white py-2 rounded">Enregistrer</button>
-            </form>
+            </div>
+            <Button onClick={handleSubmit} variant="primary" className="w-full">
+              Créer
+            </Button>
           </div>
-        )}
-
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rôle</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {utilisateurs.map((user) => (
-                <tr key={user.id}>
-                  <td className="px-6 py-4">{user.prenom} {user.nom}</td>
-                  <td className="px-6 py-4">{user.email}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded text-sm ${user.role === 'ROLE_ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}`}>
-                      {user.role === 'ROLE_ADMIN' ? 'Admin' : 'User'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 space-x-2">
-                    <button onClick={() => handleEdit(user)} className="text-blue-600 hover:underline">Modifier</button>
-                    <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:underline">Supprimer</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        </Modal>
       </div>
     </div>
   );

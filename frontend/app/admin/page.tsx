@@ -1,93 +1,117 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { motion } from 'framer-motion';
+import { BookOpen, Users, FileText, TrendingUp } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import Sidebar from '@/components/ui/Sidebar';
 import api from '@/services/api';
 import { Statistiques } from '@/types';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 export default function AdminDashboard() {
+  const { isAdmin } = useAuth();
   const [stats, setStats] = useState<Statistiques | null>(null);
   const [loading, setLoading] = useState(true);
-  const { user, logout } = useAuth();
-  const router = useRouter();
 
   useEffect(() => {
-    if (user && user.role !== 'ROLE_ADMIN') {
-      router.push('/livres');
-      return;
-    }
-
-    const fetchStats = async () => {
-      try {
-        const data = await api.getStatistiques();
-        setStats(data);
-        setLoading(false);
-      } catch (err) {
-        setLoading(false);
-      }
-    };
+    if (!isAdmin()) return;
     fetchStats();
-  }, [user, router]);
+  }, []);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
+  const fetchStats = async () => {
+    try {
+      const response = await api.get('/statistiques');
+      setStats(response.data);
+    } catch (error) {
+      console.error('Erreur:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex">
+        <Sidebar />
+        <div className="flex-1 ml-64 container-page"><div className="skeleton h-64" /></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="bg-white shadow rounded-lg p-6 mb-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-800">Dashboard Administrateur</h1>
-            <div className="space-x-4">
-              <Link href="/admin/livres" className="text-blue-600 hover:underline">Livres</Link>
-              <Link href="/admin/utilisateurs" className="text-blue-600 hover:underline">Utilisateurs</Link>
-              <Link href="/admin/demandes" className="text-blue-600 hover:underline">Demandes</Link>
-              <button onClick={logout} className="text-red-600 hover:underline">Déconnexion</button>
+    <div className="flex">
+      <Sidebar />
+      <div className="flex-1 ml-64 container-page">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <h1 className="text-4xl font-display font-bold text-text-primary mb-8">
+            Dashboard Administration
+          </h1>
+
+          {stats && (
+            <div className="grid-stats mb-12">
+              <StatsCard
+                icon={BookOpen}
+                label="Total Livres"
+                value={stats.total_livres}
+                color="primary"
+              />
+              <StatsCard
+                icon={Users}
+                label="Utilisateurs"
+                value={stats.total_utilisateurs}
+                color="accent"
+              />
+              <StatsCard
+                icon={FileText}
+                label="Demandes"
+                value={stats.total_demandes}
+                color="info"
+              />
+              <StatsCard
+                icon={TrendingUp}
+                label="En attente"
+                value={stats.demandes_en_attente}
+                color="warning"
+              />
+            </div>
+          )}
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="card">
+              <h3 className="text-xl font-display font-semibold mb-4">Livres disponibles</h3>
+              <div className="text-4xl font-bold text-success">
+                {stats?.livres_disponibles || 0}
+              </div>
+            </div>
+            <div className="card">
+              <h3 className="text-xl font-display font-semibold mb-4">Demandes approuvées</h3>
+              <div className="text-4xl font-bold text-primary">
+                {stats?.demandes_approuvees || 0}
+              </div>
             </div>
           </div>
-        </div>
-
-        {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-gray-500 text-sm font-semibold mb-2">Total Livres</h3>
-              <p className="text-3xl font-bold text-blue-600">{stats.total_livres}</p>
-              <p className="text-sm text-gray-600 mt-2">Disponibles: {stats.livres_disponibles}</p>
-            </div>
-
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-gray-500 text-sm font-semibold mb-2">Livres Empruntés</h3>
-              <p className="text-3xl font-bold text-orange-600">{stats.livres_empruntes}</p>
-            </div>
-
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-gray-500 text-sm font-semibold mb-2">Utilisateurs</h3>
-              <p className="text-3xl font-bold text-purple-600">{stats.total_utilisateurs}</p>
-            </div>
-
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-gray-500 text-sm font-semibold mb-2">Total Demandes</h3>
-              <p className="text-3xl font-bold text-green-600">{stats.total_demandes}</p>
-            </div>
-
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-gray-500 text-sm font-semibold mb-2">En Attente</h3>
-              <p className="text-3xl font-bold text-yellow-600">{stats.demandes_en_attente}</p>
-            </div>
-
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-gray-500 text-sm font-semibold mb-2">Approuvées</h3>
-              <p className="text-3xl font-bold text-green-600">{stats.demandes_approuvees}</p>
-            </div>
-
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-gray-500 text-sm font-semibold mb-2">Refusées</h3>
-              <p className="text-3xl font-bold text-red-600">{stats.demandes_refusees}</p>
-            </div>
-          </div>
-        )}
+        </motion.div>
       </div>
     </div>
+  );
+}
+
+function StatsCard({ icon: Icon, label, value, color }: any) {
+  return (
+    <motion.div
+      whileHover={{ y: -4 }}
+      className="card"
+    >
+      <div className="flex items-center justify-between mb-4">
+        <Icon className={`w-8 h-8 text-${color}`} />
+      </div>
+      <div className="text-3xl font-display font-bold text-text-primary mb-1">
+        {value}
+      </div>
+      <div className="text-text-secondary text-sm">{label}</div>
+    </motion.div>
   );
 }

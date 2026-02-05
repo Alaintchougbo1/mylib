@@ -1,8 +1,12 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { Mail, Lock, BookOpen } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import Input from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -11,75 +15,112 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
       await login(email, password);
-      // La redirection est gérée par le AuthContext
     } catch (err: any) {
-      console.error('Erreur de connexion:', err);
-      const errorMessage = err?.response?.data?.error || err?.message || 'Identifiants incorrects';
-      setError(errorMessage);
+      setError(err?.response?.data?.error || err?.message || 'Identifiants incorrects');
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8">
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Connexion
-        </h1>
+    <div className="min-h-screen flex">
+      {/* Left Side - Image/Illustration */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary-light to-accent p-12 items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-noise opacity-10" />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8 }}
+          className="relative z-10 text-white text-center space-y-6"
+        >
+          <BookOpen className="w-32 h-32 mx-auto" strokeWidth={1} />
+          <h2 className="text-4xl font-display font-bold">
+            Bienvenue dans votre bibliothèque
+          </h2>
+          <p className="text-xl opacity-90 max-w-md">
+            Accédez à des milliers de livres et gérez vos emprunts en toute simplicité
+          </p>
+        </motion.div>
+      </div>
 
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Right Side - Form */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
+          className="w-full max-w-md space-y-8"
+        >
           <div>
-            <label className="block text-gray-700 mb-2">Email</label>
-            <input
+            <h1 className="text-4xl font-display font-bold text-text-primary mb-2">
+              Connexion
+            </h1>
+            <p className="text-text-secondary">
+              Entrez vos identifiants pour accéder à votre compte
+            </p>
+          </div>
+
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 bg-error/10 border border-error/20 rounded-lg text-error text-sm"
+            >
+              {error}
+            </motion.div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <Input
               type="email"
+              label="Adresse email"
+              icon={<Mail className="w-5 h-5" />}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="votre@email.com"
+              required
             />
-          </div>
 
-          <div>
-            <label className="block text-gray-700 mb-2">Mot de passe</label>
-            <input
+            <Input
               type="password"
+              label="Mot de passe"
+              icon={<Lock className="w-5 h-5" />}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
               required
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Votre mot de passe"
             />
+
+            <Button
+              type="submit"
+              variant="primary"
+              className="w-full"
+              isLoading={loading}
+            >
+              Se connecter
+            </Button>
+          </form>
+
+          <div className="text-center text-text-secondary">
+            Pas encore de compte ?{' '}
+            <Link href="/register" className="text-primary hover:text-primary-light font-semibold transition-colors">
+              Créer un compte
+            </Link>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400"
-          >
-            {loading ? 'Connexion...' : 'Se connecter'}
-          </button>
-        </form>
-
-        <p className="text-center text-gray-600 mt-4">
-          Pas encore de compte ?{' '}
-          <Link href="/register" className="text-blue-600 hover:underline">
-            S'inscrire
-          </Link>
-        </p>
+          <div className="pt-6 border-t border-border">
+            <p className="text-sm text-text-muted text-center">
+              Comptes de test :<br />
+              <span className="font-mono text-xs">admin@library.com / admin123456</span>
+            </p>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

@@ -1,107 +1,144 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
-import api from '@/services/api';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Mail, Lock, User as UserIcon, BookOpen } from 'lucide-react';
+import Input from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
+import api from '@/services/api';
 
 export default function RegisterPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [nom, setNom] = useState('');
-  const [prenom, setPrenom] = useState('');
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    nom: '',
+    prenom: '',
+  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      await api.register({ email, password, nom, prenom });
-      router.push('/login?registered=true');
-    } catch (err) {
-      setError('Erreur lors de l\'inscription. L\'email existe peut-être déjà.');
+      await api.post('/auth/register', formData);
+      router.push('/login');
+    } catch (err: any) {
+      setError(err?.response?.data?.error || 'Une erreur est survenue');
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 py-8">
-      <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8">
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Inscription
-        </h1>
-
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="min-h-screen flex">
+      {/* Left Side - Form */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
+          className="w-full max-w-md space-y-8"
+        >
           <div>
-            <label className="block text-gray-700 mb-2">Prénom</label>
-            <input
-              type="text"
-              value={prenom}
-              onChange={(e) => setPrenom(e.target.value)}
-              required
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
+            <h1 className="text-4xl font-display font-bold text-text-primary mb-2">
+              Inscription
+            </h1>
+            <p className="text-text-secondary">
+              Créez votre compte pour commencer
+            </p>
           </div>
 
-          <div>
-            <label className="block text-gray-700 mb-2">Nom</label>
-            <input
-              type="text"
-              value={nom}
-              onChange={(e) => setNom(e.target.value)}
-              required
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 bg-error/10 border border-error/20 rounded-lg text-error text-sm"
+            >
+              {error}
+            </motion.div>
+          )}
 
-          <div>
-            <label className="block text-gray-700 mb-2">Email</label>
-            <input
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                type="text"
+                label="Prénom"
+                value={formData.prenom}
+                onChange={(e) => setFormData({ ...formData, prenom: e.target.value })}
+                placeholder="Jean"
+                required
+              />
+              <Input
+                type="text"
+                label="Nom"
+                value={formData.nom}
+                onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
+                placeholder="Dupont"
+                required
+              />
+            </div>
+
+            <Input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              label="Adresse email"
+              icon={<Mail className="w-5 h-5" />}
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="votre@email.com"
               required
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
-          </div>
 
-          <div>
-            <label className="block text-gray-700 mb-2">Mot de passe</label>
-            <input
+            <Input
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              label="Mot de passe"
+              icon={<Lock className="w-5 h-5" />}
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              placeholder="••••••••"
               required
-              minLength={6}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
+
+            <Button
+              type="submit"
+              variant="primary"
+              className="w-full"
+              isLoading={loading}
+            >
+              Créer mon compte
+            </Button>
+          </form>
+
+          <div className="text-center text-text-secondary">
+            Déjà un compte ?{' '}
+            <Link href="/login" className="text-primary hover:text-primary-light font-semibold transition-colors">
+              Se connecter
+            </Link>
           </div>
+        </motion.div>
+      </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition disabled:bg-gray-400"
-          >
-            {loading ? 'Inscription...' : 'S\'inscrire'}
-          </button>
-        </form>
-
-        <p className="text-center text-gray-600 mt-4">
-          Déjà un compte ?{' '}
-          <Link href="/login" className="text-blue-600 hover:underline">
-            Se connecter
-          </Link>
-        </p>
+      {/* Right Side - Image/Illustration */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-accent via-primary-light to-primary p-12 items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-noise opacity-10" />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8 }}
+          className="relative z-10 text-white text-center space-y-6"
+        >
+          <BookOpen className="w-32 h-32 mx-auto" strokeWidth={1} />
+          <h2 className="text-4xl font-display font-bold">
+            Rejoignez notre communauté
+          </h2>
+          <p className="text-xl opacity-90 max-w-md">
+            Découvrez des milliers de livres et partagez votre passion pour la lecture
+          </p>
+        </motion.div>
       </div>
     </div>
   );
