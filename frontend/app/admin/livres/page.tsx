@@ -9,6 +9,8 @@ import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import Badge from '@/components/ui/Badge';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import AlertDialog from '@/components/ui/AlertDialog';
 import api from '@/services/api';
 import { Livre } from '@/types';
 
@@ -24,6 +26,8 @@ export default function AdminLivresPage() {
     description: '',
     disponible: true,
   });
+  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; livreId?: number }>({ isOpen: false });
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; message: string; variant: 'success' | 'error' }>({ isOpen: false, message: '', variant: 'success' });
 
   useEffect(() => {
     fetchLivres();
@@ -31,8 +35,8 @@ export default function AdminLivresPage() {
 
   const fetchLivres = async () => {
     try {
-      const response = await api.get('/livres');
-      setLivres(response.data);
+      const data = await api.getLivres();
+      setLivres(data);
     } catch (error) {
       console.error('Erreur:', error);
     } finally {
@@ -43,25 +47,31 @@ export default function AdminLivresPage() {
   const handleSubmit = async () => {
     try {
       if (editingLivre) {
-        await api.put(`/livres/${editingLivre.id}`, formData);
+        await api.updateLivre(editingLivre.id, formData);
       } else {
-        await api.post('/livres', formData);
+        await api.createLivre(formData);
       }
       setModalOpen(false);
       resetForm();
       fetchLivres();
+      setAlertDialog({ isOpen: true, message: 'Livre enregistré avec succès', variant: 'success' });
     } catch (error) {
-      alert('Erreur lors de la sauvegarde');
+      setAlertDialog({ isOpen: true, message: 'Erreur lors de la sauvegarde', variant: 'error' });
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Confirmer la suppression ?')) return;
+  const handleDelete = (id: number) => {
+    setConfirmDialog({ isOpen: true, livreId: id });
+  };
+
+  const confirmDelete = async () => {
+    if (!confirmDialog.livreId) return;
     try {
-      await api.delete(`/livres/${id}`);
+      await api.deleteLivre(confirmDialog.livreId);
       fetchLivres();
+      setAlertDialog({ isOpen: true, message: 'Livre supprimé avec succès', variant: 'success' });
     } catch (error) {
-      alert('Erreur lors de la suppression');
+      setAlertDialog({ isOpen: true, message: 'Erreur lors de la suppression', variant: 'error' });
     }
   };
 
@@ -179,6 +189,24 @@ export default function AdminLivresPage() {
             </Button>
           </div>
         </Modal>
+
+        <ConfirmDialog
+          isOpen={confirmDialog.isOpen}
+          onClose={() => setConfirmDialog({ isOpen: false })}
+          onConfirm={confirmDelete}
+          title="Confirmer la suppression"
+          message="Êtes-vous sûr de vouloir supprimer ce livre ? Cette action est irréversible et supprimera également toutes les demandes associées."
+          confirmText="Supprimer"
+          cancelText="Annuler"
+          variant="danger"
+        />
+
+        <AlertDialog
+          isOpen={alertDialog.isOpen}
+          onClose={() => setAlertDialog({ ...alertDialog, isOpen: false })}
+          message={alertDialog.message}
+          variant={alertDialog.variant}
+        />
       </div>
     </div>
   );

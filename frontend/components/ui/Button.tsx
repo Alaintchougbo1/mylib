@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   icon?: React.ReactNode;
@@ -20,6 +20,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       secondary: 'btn-secondary',
       ghost: 'btn-ghost',
       danger: 'btn-danger',
+      outline: 'btn-outline',
     };
 
     const sizeClasses = {

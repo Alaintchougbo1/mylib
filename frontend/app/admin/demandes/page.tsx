@@ -5,11 +5,13 @@ import { Check, X } from 'lucide-react';
 import Sidebar from '@/components/ui/Sidebar';
 import Table from '@/components/ui/Table';
 import { StatusBadge } from '@/components/ui/Badge';
+import AlertDialog from '@/components/ui/AlertDialog';
 import api from '@/services/api';
 import { Demande } from '@/types';
 
 export default function AdminDemandesPage() {
   const [demandes, setDemandes] = useState<Demande[]>([]);
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; message: string; variant: 'success' | 'error' }>({ isOpen: false, message: '', variant: 'success' });
 
   useEffect(() => {
     fetchDemandes();
@@ -17,8 +19,8 @@ export default function AdminDemandesPage() {
 
   const fetchDemandes = async () => {
     try {
-      const response = await api.get('/demandes');
-      setDemandes(response.data);
+      const data = await api.getDemandes();
+      setDemandes(data);
     } catch (error) {
       console.error('Erreur:', error);
     }
@@ -26,28 +28,31 @@ export default function AdminDemandesPage() {
 
   const handleApprove = async (id: number) => {
     try {
-      await api.put(`/demandes/${id}`, { statut: 'approuvee' });
+      await api.updateDemande(id, { statut: 'approuvee' });
       fetchDemandes();
+      setAlertDialog({ isOpen: true, message: 'Demande approuvée avec succès', variant: 'success' });
     } catch (error) {
-      alert('Erreur');
+      setAlertDialog({ isOpen: true, message: 'Erreur lors de l\'approbation', variant: 'error' });
     }
   };
 
   const handleReject = async (id: number) => {
     try {
-      await api.put(`/demandes/${id}`, { statut: 'refusee' });
+      await api.updateDemande(id, { statut: 'refusee' });
       fetchDemandes();
+      setAlertDialog({ isOpen: true, message: 'Demande refusée avec succès', variant: 'success' });
     } catch (error) {
-      alert('Erreur');
+      setAlertDialog({ isOpen: true, message: 'Erreur lors du refus', variant: 'error' });
     }
   };
 
   const handleReturn = async (id: number) => {
     try {
-      await api.put(`/demandes/${id}`, { statut: 'retournee' });
+      await api.updateDemande(id, { statut: 'retournee' });
       fetchDemandes();
+      setAlertDialog({ isOpen: true, message: 'Livre marqué comme retourné', variant: 'success' });
     } catch (error) {
-      alert('Erreur');
+      setAlertDialog({ isOpen: true, message: 'Erreur lors du retour', variant: 'error' });
     }
   };
 
@@ -113,6 +118,13 @@ export default function AdminDemandesPage() {
               )}
             </div>
           )}
+        />
+
+        <AlertDialog
+          isOpen={alertDialog.isOpen}
+          onClose={() => setAlertDialog({ ...alertDialog, isOpen: false })}
+          message={alertDialog.message}
+          variant={alertDialog.variant}
         />
       </div>
     </div>

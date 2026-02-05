@@ -20,8 +20,8 @@ export default function DemandesPage() {
 
   const fetchDemandes = async () => {
     try {
-      const response = await api.get('/demandes');
-      setDemandes(response.data);
+      const data = await api.getDemandes();
+      setDemandes(data);
     } catch (error) {
       console.error('Erreur:', error);
     } finally {

@@ -49,7 +49,7 @@ export default function LandingPage() {
                   </Button>
                 </Link>
                 <Link href="/login">
-                  <Button variant="ghost" size="lg">
+                  <Button variant="ghost" size="lg"className='cursor-pointer'>
                     Se connecter
                   </Button>
                 </Link>
@@ -153,7 +153,7 @@ export default function LandingPage() {
             Rejoignez notre communauté de lecteurs passionnés dès aujourd'hui.
           </p>
           <Link href="/register">
-            <Button variant="secondary" size="lg">
+            <Button variant="secondary" size="lg" className='cursor-pointer'>
               Créer mon compte gratuitement
             </Button>
           </Link>
@@ -164,7 +164,7 @@ export default function LandingPage() {
       <footer className="bg-surface border-t border-border py-12 mt-20">
         <div className="container-section">
           <div className="text-center text-text-muted">
-            <p>© 2024 Bibliothèque. Tous droits réservés.</p>
+            <p>© 2026 Bibliothèque. Tous droits réservés.</p>
           </div>
         </div>
       </footer>

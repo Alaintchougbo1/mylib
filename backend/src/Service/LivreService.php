@@ -9,6 +9,7 @@ use App\DTO\LivreResponseDTO;
 use App\DTO\UpdateLivreDTO;
 use App\Entity\Livre;
 use App\Repository\LivreRepository;
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
@@ -104,6 +105,8 @@ class LivreService
 
     /**
      * Supprime un livre.
+     *
+     * @throws \RuntimeException Si le livre ne peut pas être supprimé à cause de demandes associées
      */
     public function deleteLivre(int $id): bool
     {
@@ -113,9 +116,17 @@ class LivreService
             return false;
         }
 
-        $this->entityManager->remove($livre);
-        $this->entityManager->flush();
-
-        return true;
+        try {
+            $this->entityManager->remove($livre);
+            $this->entityManager->flush();
+            return true;
+        } catch (ForeignKeyConstraintViolationException $e) {
+            throw new \RuntimeException(
+                'Impossible de supprimer ce livre car il est associé à des demandes d\'emprunt. ' .
+                'Veuillez d\'abord supprimer les demandes ou mettre à jour la base de données.',
+                0,
+                $e
+            );
+        }
     }
 }

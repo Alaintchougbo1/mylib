@@ -8,6 +8,8 @@ import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import Badge from '@/components/ui/Badge';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import AlertDialog from '@/components/ui/AlertDialog';
 import api from '@/services/api';
 import { User } from '@/types';
 
@@ -21,6 +23,8 @@ export default function AdminUtilisateursPage() {
     prenom: '',
     role: 'ROLE_USER',
   });
+  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; userId?: number }>({ isOpen: false });
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; message: string; variant: 'success' | 'error' }>({ isOpen: false, message: '', variant: 'success' });
 
   useEffect(() => {
     fetchUsers();
@@ -28,8 +32,8 @@ export default function AdminUtilisateursPage() {
 
   const fetchUsers = async () => {
     try {
-      const response = await api.get('/utilisateurs');
-      setUsers(response.data);
+      const data = await api.getUtilisateurs();
+      setUsers(data);
     } catch (error) {
       console.error('Erreur:', error);
     }
@@ -37,22 +41,28 @@ export default function AdminUtilisateursPage() {
 
   const handleSubmit = async () => {
     try {
-      await api.post('/utilisateurs', formData);
+      await api.createUtilisateur(formData);
       setModalOpen(false);
       setFormData({ email: '', password: '', nom: '', prenom: '', role: 'ROLE_USER' });
       fetchUsers();
+      setAlertDialog({ isOpen: true, message: 'Utilisateur créé avec succès', variant: 'success' });
     } catch (error) {
-      alert('Erreur lors de la création');
+      setAlertDialog({ isOpen: true, message: 'Erreur lors de la création', variant: 'error' });
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Confirmer la suppression ?')) return;
+  const handleDelete = (id: number) => {
+    setConfirmDialog({ isOpen: true, userId: id });
+  };
+
+  const confirmDelete = async () => {
+    if (!confirmDialog.userId) return;
     try {
-      await api.delete(`/utilisateurs/${id}`);
+      await api.deleteUtilisateur(confirmDialog.userId);
       fetchUsers();
+      setAlertDialog({ isOpen: true, message: 'Utilisateur supprimé avec succès', variant: 'success' });
     } catch (error) {
-      alert('Erreur');
+      setAlertDialog({ isOpen: true, message: 'Erreur lors de la suppression', variant: 'error' });
     }
   };
 
@@ -149,6 +159,24 @@ export default function AdminUtilisateursPage() {
             </Button>
           </div>
         </Modal>
+
+        <ConfirmDialog
+          isOpen={confirmDialog.isOpen}
+          onClose={() => setConfirmDialog({ isOpen: false })}
+          onConfirm={confirmDelete}
+          title="Confirmer la suppression"
+          message="Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible."
+          confirmText="Supprimer"
+          cancelText="Annuler"
+          variant="danger"
+        />
+
+        <AlertDialog
+          isOpen={alertDialog.isOpen}
+          onClose={() => setAlertDialog({ ...alertDialog, isOpen: false })}
+          message={alertDialog.message}
+          variant={alertDialog.variant}
+        />
       </div>
     </div>
   );

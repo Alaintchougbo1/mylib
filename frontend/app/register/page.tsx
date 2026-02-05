@@ -26,7 +26,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await api.post('/auth/register', formData);
+      await api.register(formData);
       router.push('/login');
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Une erreur est survenue');

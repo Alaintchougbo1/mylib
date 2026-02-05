@@ -1,43 +1,58 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, BookOpen, Calendar } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
+import AlertDialog from '@/components/ui/AlertDialog';
 import api from '@/services/api';
 import { Livre } from '@/types';
 
-export default function LivreDetailPage({ params }: { params: { id: string } }) {
+export default function LivreDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const unwrappedParams = use(params);
   const router = useRouter();
   const [livre, setLivre] = useState<Livre | null>(null);
   const [loading, setLoading] = useState(true);
   const [requesting, setRequesting] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; message: string; variant: 'success' | 'error'; onClose?: () => void }>({
+    isOpen: false,
+    message: '',
+    variant: 'success'
+  });
 
   useEffect(() => {
-    fetchLivre();
-  }, [params.id]);
+    const fetchLivre = async () => {
+      try {
+        const data = await api.getLivre(Number(unwrappedParams.id));
+        setLivre(data);
+      } catch (error) {
+        console.error('Erreur:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchLivre = async () => {
-    try {
-      const response = await api.get(`/livres/${params.id}`);
-      setLivre(response.data);
-    } catch (error) {
-      console.error('Erreur:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchLivre();
+  }, [unwrappedParams.id]);
 
   const handleRequest = async () => {
     setRequesting(true);
     try {
-      await api.post('/demandes', { livreId: Number(params.id) });
-      alert('Demande envoyée avec succès!');
-      router.push('/demandes');
+      await api.createDemande(Number(unwrappedParams.id));
+      setAlertDialog({
+        isOpen: true,
+        message: 'Demande envoyée avec succès!',
+        variant: 'success',
+        onClose: () => router.push('/demandes')
+      });
     } catch (error: any) {
-      alert(error?.response?.data?.error || 'Erreur lors de la demande');
+      setAlertDialog({
+        isOpen: true,
+        message: error?.response?.data?.error || 'Erreur lors de la demande',
+        variant: 'error'
+      });
     } finally {
       setRequesting(false);
     }
@@ -118,6 +133,18 @@ export default function LivreDetailPage({ params }: { params: { id: string } }) 
             </div>
           </div>
         </div>
+
+        <AlertDialog
+          isOpen={alertDialog.isOpen}
+          onClose={() => {
+            if (alertDialog.onClose) {
+              alertDialog.onClose();
+            }
+            setAlertDialog({ ...alertDialog, isOpen: false });
+          }}
+          message={alertDialog.message}
+          variant={alertDialog.variant}
+        />
       </motion.div>
     </div>
   );

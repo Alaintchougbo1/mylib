@@ -20,8 +20,8 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const response = await api.get('/statistiques');
-      setStats(response.data);
+      const data = await api.getStatistiques();
+      setStats(data);
     } catch (error) {
       console.error('Erreur:', error);
     } finally {

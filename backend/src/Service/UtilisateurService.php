@@ -10,6 +10,7 @@ use App\DTO\UserResponseDTO;
 use App\Entity\User;
 use App\Exception\UserAlreadyExistsException;
 use App\Repository\UserRepository;
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -123,6 +124,8 @@ class UtilisateurService
 
     /**
      * Supprime un utilisateur.
+     *
+     * @throws \RuntimeException Si l'utilisateur ne peut pas être supprimé à cause de demandes associées
      */
     public function deleteUtilisateur(int $id): bool
     {
@@ -132,9 +135,17 @@ class UtilisateurService
             return false;
         }
 
-        $this->entityManager->remove($user);
-        $this->entityManager->flush();
-
-        return true;
+        try {
+            $this->entityManager->remove($user);
+            $this->entityManager->flush();
+            return true;
+        } catch (ForeignKeyConstraintViolationException $e) {
+            throw new \RuntimeException(
+                'Impossible de supprimer cet utilisateur car il a des demandes d\'emprunt associées. ' .
+                'Veuillez d\'abord supprimer les demandes ou mettre à jour la base de données.',
+                0,
+                $e
+            );
+        }
     }
 }

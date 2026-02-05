@@ -27,11 +27,11 @@ export default function Card({ children, hover = true, className = '', ...props 
   );
 }
 
-export function BookCard({ 
-  title, 
-  author, 
-  disponible, 
-  imageUrl, 
+export function BookCard({
+  title,
+  author,
+  disponible,
+  imageUrl,
   onAction,
   actionLabel = 'Voir détails'
 }: {
@@ -44,15 +44,18 @@ export function BookCard({
 }) {
   return (
     <motion.div
-      className="card-book"
+      className={`card-book ${onAction ? 'cursor-pointer' : ''}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
+      whileHover={onAction ? { y: -8, scale: 1.02 } : {}}
+      whileTap={onAction ? { scale: 0.98 } : {}}
+      onClick={onAction}
     >
       <div className="relative h-64 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg overflow-hidden mb-4">
         {imageUrl ? (
-          <img 
-            src={imageUrl} 
+          <img
+            src={imageUrl}
             alt={title}
             className="card-book-image w-full h-full object-cover"
           />
@@ -64,25 +67,25 @@ export function BookCard({
           </div>
         )}
       </div>
-      
+
       <div className="space-y-2">
         <h3 className="text-xl font-display font-semibold text-text-primary line-clamp-2">{title}</h3>
         <p className="text-sm text-text-muted">par {author}</p>
-        
+
         <div className="flex items-center justify-between pt-4">
           {disponible ? (
             <span className="badge-success">Disponible</span>
           ) : (
             <span className="badge-error">Indisponible</span>
           )}
-          
+
           {onAction && (
-            <button 
-              onClick={onAction}
-              className="text-sm font-semibold text-primary hover:text-primary-light transition-colors"
-            >
-              {actionLabel} →
-            </button>
+            <span className="text-sm font-semibold text-primary group-hover:text-primary-light transition-colors flex items-center gap-1">
+              {actionLabel}
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </span>
           )}
         </div>
       </div>

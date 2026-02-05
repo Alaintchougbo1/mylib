@@ -30,8 +30,8 @@ export default function LivresPage() {
 
   const fetchLivres = async () => {
     try {
-      const response = await api.get('/livres');
-      setLivres(response.data);
+      const data = await api.getLivres();
+      setLivres(data);
     } catch (error) {
       console.error('Erreur lors du chargement des livres:', error);
     } finally {
