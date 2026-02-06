@@ -100,7 +100,19 @@ class DemandeController extends AbstractController
             new OA\Response(
                 response: 200,
                 description: 'Détails de la demande',
-                content: new OA\JsonContent(ref: '#/components/schemas/DemandeResponse')
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer', example: 1),
+                        new OA\Property(property: 'user', type: 'object'),
+                        new OA\Property(property: 'livre', type: 'object'),
+                        new OA\Property(property: 'statut', type: 'string', example: 'en_attente'),
+                        new OA\Property(property: 'dateDemande', type: 'string', example: '2024-01-01 12:00:00'),
+                        new OA\Property(property: 'dateRetour', type: 'string', example: null, nullable: true),
+                        new OA\Property(property: 'commentaire', type: 'string', example: null, nullable: true),
+                        new OA\Property(property: 'createdAt', type: 'string'),
+                        new OA\Property(property: 'updatedAt', type: 'string'),
+                    ]
+                )
             ),
             new OA\Response(response: 401, description: 'Non authentifié'),
             new OA\Response(response: 403, description: 'Accès refusé'),
@@ -144,7 +156,19 @@ class DemandeController extends AbstractController
             new OA\Response(
                 response: 201,
                 description: 'Demande créée avec succès',
-                content: new OA\JsonContent(ref: '#/components/schemas/DemandeResponse')
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer', example: 1),
+                        new OA\Property(property: 'user', type: 'object'),
+                        new OA\Property(property: 'livre', type: 'object'),
+                        new OA\Property(property: 'statut', type: 'string', example: 'en_attente'),
+                        new OA\Property(property: 'dateDemande', type: 'string', example: '2024-01-01 12:00:00'),
+                        new OA\Property(property: 'dateRetour', type: 'string', example: null, nullable: true),
+                        new OA\Property(property: 'commentaire', type: 'string', example: null, nullable: true),
+                        new OA\Property(property: 'createdAt', type: 'string'),
+                        new OA\Property(property: 'updatedAt', type: 'string'),
+                    ]
+                )
             ),
             new OA\Response(response: 400, description: 'Données invalides ou livre non disponible'),
             new OA\Response(response: 401, description: 'Non authentifié'),
@@ -221,7 +245,19 @@ class DemandeController extends AbstractController
             new OA\Response(
                 response: 200,
                 description: 'Demande mise à jour avec succès',
-                content: new OA\JsonContent(ref: '#/components/schemas/DemandeResponse')
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer', example: 1),
+                        new OA\Property(property: 'user', type: 'object'),
+                        new OA\Property(property: 'livre', type: 'object'),
+                        new OA\Property(property: 'statut', type: 'string', example: 'en_attente'),
+                        new OA\Property(property: 'dateDemande', type: 'string', example: '2024-01-01 12:00:00'),
+                        new OA\Property(property: 'dateRetour', type: 'string', example: null, nullable: true),
+                        new OA\Property(property: 'commentaire', type: 'string', example: null, nullable: true),
+                        new OA\Property(property: 'createdAt', type: 'string'),
+                        new OA\Property(property: 'updatedAt', type: 'string'),
+                    ]
+                )
             ),
             new OA\Response(response: 400, description: 'Données invalides'),
             new OA\Response(response: 401, description: 'Non authentifié'),

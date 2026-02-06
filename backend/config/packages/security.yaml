@@ -34,6 +34,7 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         # Routes publiques
+        - { path: ^/api/doc, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/(login|register), roles: PUBLIC_ACCESS }
         # Routes protégées - authentification requise
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }

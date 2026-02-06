@@ -91,7 +91,17 @@ class UtilisateurController extends AbstractController
             new OA\Response(
                 response: 200,
                 description: 'Détails de l\'utilisateur',
-                content: new OA\JsonContent(ref: '#/components/schemas/UserResponse')
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer', example: 1),
+                        new OA\Property(property: 'email', type: 'string', example: 'user@example.com'),
+                        new OA\Property(property: 'nom', type: 'string', example: 'Dupont'),
+                        new OA\Property(property: 'prenom', type: 'string', example: 'Jean'),
+                        new OA\Property(property: 'role', type: 'string', example: 'ROLE_USER'),
+                        new OA\Property(property: 'createdAt', type: 'string', example: '2024-01-01 12:00:00'),
+                        new OA\Property(property: 'updatedAt', type: 'string', example: '2024-01-01 12:00:00'),
+                    ]
+                )
             ),
             new OA\Response(response: 401, description: 'Non authentifié'),
             new OA\Response(response: 403, description: 'Accès refusé'),
@@ -133,7 +143,17 @@ class UtilisateurController extends AbstractController
             new OA\Response(
                 response: 201,
                 description: 'Utilisateur créé avec succès',
-                content: new OA\JsonContent(ref: '#/components/schemas/UserResponse')
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer', example: 1),
+                        new OA\Property(property: 'email', type: 'string', example: 'user@example.com'),
+                        new OA\Property(property: 'nom', type: 'string', example: 'Dupont'),
+                        new OA\Property(property: 'prenom', type: 'string', example: 'Jean'),
+                        new OA\Property(property: 'role', type: 'string', example: 'ROLE_USER'),
+                        new OA\Property(property: 'createdAt', type: 'string', example: '2024-01-01 12:00:00'),
+                        new OA\Property(property: 'updatedAt', type: 'string', example: '2024-01-01 12:00:00'),
+                    ]
+                )
             ),
             new OA\Response(response: 400, description: 'Données invalides'),
             new OA\Response(response: 401, description: 'Non authentifié'),
@@ -202,7 +222,17 @@ class UtilisateurController extends AbstractController
             new OA\Response(
                 response: 200,
                 description: 'Utilisateur mis à jour avec succès',
-                content: new OA\JsonContent(ref: '#/components/schemas/UserResponse')
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer', example: 1),
+                        new OA\Property(property: 'email', type: 'string', example: 'user@example.com'),
+                        new OA\Property(property: 'nom', type: 'string', example: 'Dupont'),
+                        new OA\Property(property: 'prenom', type: 'string', example: 'Jean'),
+                        new OA\Property(property: 'role', type: 'string', example: 'ROLE_USER'),
+                        new OA\Property(property: 'createdAt', type: 'string', example: '2024-01-01 12:00:00'),
+                        new OA\Property(property: 'updatedAt', type: 'string', example: '2024-01-01 12:00:00'),
+                    ]
+                )
             ),
             new OA\Response(response: 400, description: 'Données invalides'),
             new OA\Response(response: 401, description: 'Non authentifié'),

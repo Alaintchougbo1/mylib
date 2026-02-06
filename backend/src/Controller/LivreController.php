@@ -172,7 +172,18 @@ class LivreController extends AbstractController
             new OA\Response(
                 response: 201,
                 description: 'Livre créé avec succès',
-                content: new OA\JsonContent(ref: '#/components/schemas/LivreResponse')
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer', example: 1),
+                        new OA\Property(property: 'titre', type: 'string', example: 'Le Petit Prince'),
+                        new OA\Property(property: 'auteur', type: 'string', example: 'Antoine de Saint-Exupéry'),
+                        new OA\Property(property: 'isbn', type: 'string', example: '978-2-07-061275-8', nullable: true),
+                        new OA\Property(property: 'description', type: 'string', example: 'Un conte philosophique...', nullable: true),
+                        new OA\Property(property: 'disponible', type: 'boolean', example: true),
+                        new OA\Property(property: 'createdAt', type: 'string', example: '2024-01-01 12:00:00'),
+                        new OA\Property(property: 'updatedAt', type: 'string', example: '2024-01-01 12:00:00'),
+                    ]
+                )
             ),
             new OA\Response(response: 400, description: 'Données invalides'),
             new OA\Response(response: 401, description: 'Non authentifié'),
@@ -239,7 +250,18 @@ class LivreController extends AbstractController
             new OA\Response(
                 response: 200,
                 description: 'Livre mis à jour avec succès',
-                content: new OA\JsonContent(ref: '#/components/schemas/LivreResponse')
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer', example: 1),
+                        new OA\Property(property: 'titre', type: 'string', example: 'Le Petit Prince'),
+                        new OA\Property(property: 'auteur', type: 'string', example: 'Antoine de Saint-Exupéry'),
+                        new OA\Property(property: 'isbn', type: 'string', example: '978-2-07-061275-8', nullable: true),
+                        new OA\Property(property: 'description', type: 'string', example: 'Un conte philosophique...', nullable: true),
+                        new OA\Property(property: 'disponible', type: 'boolean', example: true),
+                        new OA\Property(property: 'createdAt', type: 'string', example: '2024-01-01 12:00:00'),
+                        new OA\Property(property: 'updatedAt', type: 'string', example: '2024-01-01 12:00:00'),
+                    ]
+                )
             ),
             new OA\Response(response: 400, description: 'Données invalides'),
             new OA\Response(response: 401, description: 'Non authentifié'),

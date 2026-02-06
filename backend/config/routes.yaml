@@ -4,13 +4,7 @@ controllers:
         namespace: App\Controller
     type: attribute
 
-# Nelmio API Documentation
-app.swagger_ui:
-    path: /api/doc
-    methods: GET
-    defaults: { _controller: nelmio_api_doc.controller.swagger_ui }
-
-app.swagger:
-    path: /api/doc.json
-    methods: GET
-    defaults: { _controller: nelmio_api_doc.controller.swagger }
+# Nelmio API Documentation routes
+nelmio_api_doc:
+    resource: '@NelmioApiDocBundle/config/routing/swaggerui.php'
+    prefix: /api/doc
