@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Edit, Trash2 } from 'lucide-react';
-import Sidebar from '@/components/ui/Sidebar';
+import AdminLayout from '@/components/layouts/AdminLayout';
 import Table from '@/components/ui/Table';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
@@ -108,106 +108,104 @@ export default function AdminLivresPage() {
   ];
 
   return (
-    <div className="flex">
-      <Sidebar />
-      <div className="flex-1 ml-64 container-page">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-display font-bold">Gestion des livres</h1>
-          <Button
-            onClick={() => { resetForm(); setModalOpen(true); }}
-            variant="primary"
-            icon={<Plus className="w-5 h-5" />}
-          >
-            Ajouter un livre
+    <AdminLayout>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+        <h1 className="text-3xl sm:text-4xl font-display font-bold">Gestion des livres</h1>
+        <Button
+          onClick={() => { resetForm(); setModalOpen(true); }}
+          variant="primary"
+          icon={<Plus className="w-5 h-5" />}
+          className="w-full sm:w-auto"
+        >
+          Ajouter un livre
+        </Button>
+      </div>
+
+      <Table
+        data={livres}
+        columns={columns}
+        actions={(livre) => (
+          <div className="flex gap-2">
+            <button
+              onClick={() => openEditModal(livre)}
+              className="text-primary hover:text-primary-light"
+            >
+              <Edit className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => handleDelete(livre.id)}
+              className="text-error hover:text-error/80"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+      />
+
+      <Modal
+        isOpen={modalOpen}
+        onClose={() => { setModalOpen(false); resetForm(); }}
+        title={editingLivre ? 'Modifier le livre' : 'Ajouter un livre'}
+      >
+        <div className="space-y-4">
+          <Input
+            label="Titre"
+            value={formData.titre}
+            onChange={(e) => setFormData({ ...formData, titre: e.target.value })}
+            required
+          />
+          <Input
+            label="Auteur"
+            value={formData.auteur}
+            onChange={(e) => setFormData({ ...formData, auteur: e.target.value })}
+            required
+          />
+          <Input
+            label="ISBN"
+            value={formData.isbn}
+            onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
+          />
+          <div>
+            <label className="input-label">Description</label>
+            <textarea
+              className="input"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              rows={4}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={formData.disponible}
+              onChange={(e) => setFormData({ ...formData, disponible: e.target.checked })}
+              className="w-4 h-4"
+            />
+            <label>Disponible</label>
+          </div>
+          <Button onClick={handleSubmit} variant="primary" className="w-full">
+            {editingLivre ? 'Modifier' : 'Ajouter'}
           </Button>
         </div>
+      </Modal>
 
-        <Table
-          data={livres}
-          columns={columns}
-          actions={(livre) => (
-            <div className="flex gap-2">
-              <button
-                onClick={() => openEditModal(livre)}
-                className="text-primary hover:text-primary-light"
-              >
-                <Edit className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => handleDelete(livre.id)}
-                className="text-error hover:text-error/80"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
-            </div>
-          )}
-        />
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ isOpen: false })}
+        onConfirm={confirmDelete}
+        title="Confirmer la suppression"
+        message="Êtes-vous sûr de vouloir supprimer ce livre ? Cette action est irréversible et supprimera également toutes les demandes associées."
+        confirmText="Supprimer"
+        cancelText="Annuler"
+        variant="danger"
+      />
 
-        <Modal
-          isOpen={modalOpen}
-          onClose={() => { setModalOpen(false); resetForm(); }}
-          title={editingLivre ? 'Modifier le livre' : 'Ajouter un livre'}
-        >
-          <div className="space-y-4">
-            <Input
-              label="Titre"
-              value={formData.titre}
-              onChange={(e) => setFormData({ ...formData, titre: e.target.value })}
-              required
-            />
-            <Input
-              label="Auteur"
-              value={formData.auteur}
-              onChange={(e) => setFormData({ ...formData, auteur: e.target.value })}
-              required
-            />
-            <Input
-              label="ISBN"
-              value={formData.isbn}
-              onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
-            />
-            <div>
-              <label className="input-label">Description</label>
-              <textarea
-                className="input"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={4}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={formData.disponible}
-                onChange={(e) => setFormData({ ...formData, disponible: e.target.checked })}
-                className="w-4 h-4"
-              />
-              <label>Disponible</label>
-            </div>
-            <Button onClick={handleSubmit} variant="primary" className="w-full">
-              {editingLivre ? 'Modifier' : 'Ajouter'}
-            </Button>
-          </div>
-        </Modal>
-
-        <ConfirmDialog
-          isOpen={confirmDialog.isOpen}
-          onClose={() => setConfirmDialog({ isOpen: false })}
-          onConfirm={confirmDelete}
-          title="Confirmer la suppression"
-          message="Êtes-vous sûr de vouloir supprimer ce livre ? Cette action est irréversible et supprimera également toutes les demandes associées."
-          confirmText="Supprimer"
-          cancelText="Annuler"
-          variant="danger"
-        />
-
-        <AlertDialog
-          isOpen={alertDialog.isOpen}
-          onClose={() => setAlertDialog({ ...alertDialog, isOpen: false })}
-          message={alertDialog.message}
-          variant={alertDialog.variant}
-        />
-      </div>
-    </div>
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        onClose={() => setAlertDialog({ ...alertDialog, isOpen: false })}
+        message={alertDialog.message}
+        variant={alertDialog.variant}
+      />
+    </AdminLayout>
   );
 }

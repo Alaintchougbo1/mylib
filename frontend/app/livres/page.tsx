@@ -63,16 +63,16 @@ export default function LivresPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="mb-8">
-          <h1 className="text-4xl font-display font-bold text-text-primary mb-4">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-3xl sm:text-4xl font-display font-bold text-text-primary mb-3 sm:mb-4">
             Catalogue de livres
           </h1>
-          <p className="text-text-secondary">
+          <p className="text-text-secondary text-sm sm:text-base">
             Découvrez notre collection et empruntez vos livres préférés
           </p>
         </div>
 
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <SearchBar
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

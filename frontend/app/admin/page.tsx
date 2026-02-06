@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BookOpen, Users, FileText, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import Sidebar from '@/components/ui/Sidebar';
+import AdminLayout from '@/components/layouts/AdminLayout';
 import api from '@/services/api';
 import { Statistiques } from '@/types';
 
@@ -31,71 +31,67 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex">
-        <Sidebar />
-        <div className="flex-1 ml-64 container-page"><div className="skeleton h-64" /></div>
-      </div>
+      <AdminLayout>
+        <div className="skeleton h-64" />
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="flex">
-      <Sidebar />
-      <div className="flex-1 ml-64 container-page">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h1 className="text-4xl font-display font-bold text-text-primary mb-8">
-            Dashboard Administration
-          </h1>
+    <AdminLayout>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <h1 className="text-3xl sm:text-4xl font-display font-bold text-text-primary mb-6 sm:mb-8">
+          Dashboard Administration
+        </h1>
 
-          {stats && (
-            <div className="grid-stats mb-12">
-              <StatsCard
-                icon={BookOpen}
-                label="Total Livres"
-                value={stats.total_livres}
-                color="primary"
-              />
-              <StatsCard
-                icon={Users}
-                label="Utilisateurs"
-                value={stats.total_utilisateurs}
-                color="accent"
-              />
-              <StatsCard
-                icon={FileText}
-                label="Demandes"
-                value={stats.total_demandes}
-                color="info"
-              />
-              <StatsCard
-                icon={TrendingUp}
-                label="En attente"
-                value={stats.demandes_en_attente}
-                color="warning"
-              />
-            </div>
-          )}
+        {stats && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
+            <StatsCard
+              icon={BookOpen}
+              label="Total Livres"
+              value={stats.total_livres}
+              color="primary"
+            />
+            <StatsCard
+              icon={Users}
+              label="Utilisateurs"
+              value={stats.total_utilisateurs}
+              color="accent"
+            />
+            <StatsCard
+              icon={FileText}
+              label="Demandes"
+              value={stats.total_demandes}
+              color="info"
+            />
+            <StatsCard
+              icon={TrendingUp}
+              label="En attente"
+              value={stats.demandes_en_attente}
+              color="warning"
+            />
+          </div>
+        )}
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="card">
-              <h3 className="text-xl font-display font-semibold mb-4">Livres disponibles</h3>
-              <div className="text-4xl font-bold text-success">
-                {stats?.livres_disponibles || 0}
-              </div>
-            </div>
-            <div className="card">
-              <h3 className="text-xl font-display font-semibold mb-4">Demandes approuvées</h3>
-              <div className="text-4xl font-bold text-primary">
-                {stats?.demandes_approuvees || 0}
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          <div className="card">
+            <h3 className="text-lg sm:text-xl font-display font-semibold mb-4">Livres disponibles</h3>
+            <div className="text-3xl sm:text-4xl font-bold text-success">
+              {stats?.livres_disponibles || 0}
             </div>
           </div>
-        </motion.div>
-      </div>
-    </div>
+          <div className="card">
+            <h3 className="text-lg sm:text-xl font-display font-semibold mb-4">Demandes approuvées</h3>
+            <div className="text-3xl sm:text-4xl font-bold text-primary">
+              {stats?.demandes_approuvees || 0}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </AdminLayout>
   );
 }
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Check, X } from 'lucide-react';
-import Sidebar from '@/components/ui/Sidebar';
+import AdminLayout from '@/components/layouts/AdminLayout';
 import Table from '@/components/ui/Table';
 import { StatusBadge } from '@/components/ui/Badge';
 import AlertDialog from '@/components/ui/AlertDialog';
@@ -80,10 +80,8 @@ export default function AdminDemandesPage() {
   ];
 
   return (
-    <div className="flex">
-      <Sidebar />
-      <div className="flex-1 ml-64 container-page">
-        <h1 className="text-4xl font-display font-bold mb-8">Gestion des demandes</h1>
+    <AdminLayout>
+      <h1 className="text-3xl sm:text-4xl font-display font-bold mb-6 sm:mb-8">Gestion des demandes</h1>
 
         <Table
           data={demandes}
@@ -126,7 +124,6 @@ export default function AdminDemandesPage() {
           message={alertDialog.message}
           variant={alertDialog.variant}
         />
-      </div>
-    </div>
+    </AdminLayout>
   );
 }

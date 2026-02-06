@@ -1,4 +1,4 @@
-import React, { ReactNode } from "next";
+import React, { ReactNode } from "react";
 import type { Metadata } from "next";
 import { Playfair_Display, Lexend } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";

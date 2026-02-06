@@ -81,19 +81,19 @@ export default function LivreDetailPage({ params }: { params: Promise<{ id: stri
           Retour à la liste
         </button>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
           <div className="lg:col-span-1">
             <div className="card aspect-[3/4] bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-              <BookOpen className="w-32 h-32 text-primary/30" />
+              <BookOpen className="w-24 sm:w-32 h-24 sm:h-32 text-primary/30" />
             </div>
           </div>
 
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             <div>
-              <h1 className="text-4xl font-display font-bold text-text-primary mb-2">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-text-primary mb-2">
                 {livre.titre}
               </h1>
-              <p className="text-xl text-text-secondary mb-4">par {livre.auteur}</p>
+              <p className="text-lg sm:text-xl text-text-secondary mb-4">par {livre.auteur}</p>
               {livre.disponible ? (
                 <Badge variant="success">Disponible</Badge>
               ) : (
@@ -115,18 +115,19 @@ export default function LivreDetailPage({ params }: { params: Promise<{ id: stri
               </div>
             )}
 
-            <div className="pt-6">
+            <div className="pt-4 sm:pt-6">
               {livre.disponible ? (
                 <Button
                   onClick={handleRequest}
                   isLoading={requesting}
                   variant="primary"
                   size="lg"
+                  className="w-full sm:w-auto"
                 >
                   Demander l'emprunt
                 </Button>
               ) : (
-                <Button variant="ghost" size="lg" disabled>
+                <Button variant="ghost" size="lg" disabled className="w-full sm:w-auto">
                   Livre indisponible
                 </Button>
               )}

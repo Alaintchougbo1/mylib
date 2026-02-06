@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2 } from 'lucide-react';
-import Sidebar from '@/components/ui/Sidebar';
+import AdminLayout from '@/components/layouts/AdminLayout';
 import Table from '@/components/ui/Table';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
@@ -82,19 +82,18 @@ export default function AdminUtilisateursPage() {
   ];
 
   return (
-    <div className="flex">
-      <Sidebar />
-      <div className="flex-1 ml-64 container-page">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-display font-bold">Gestion des utilisateurs</h1>
-          <Button
-            onClick={() => setModalOpen(true)}
-            variant="primary"
-            icon={<Plus className="w-5 h-5" />}
-          >
-            Ajouter un utilisateur
-          </Button>
-        </div>
+    <AdminLayout>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+        <h1 className="text-3xl sm:text-4xl font-display font-bold">Gestion des utilisateurs</h1>
+        <Button
+          onClick={() => setModalOpen(true)}
+          variant="primary"
+          icon={<Plus className="w-5 h-5" />}
+          className="w-full sm:w-auto"
+        >
+          Ajouter un utilisateur
+        </Button>
+      </div>
 
         <Table
           data={users}
@@ -177,7 +176,6 @@ export default function AdminUtilisateursPage() {
           message={alertDialog.message}
           variant={alertDialog.variant}
         />
-      </div>
-    </div>
+    </AdminLayout>
   );
 }

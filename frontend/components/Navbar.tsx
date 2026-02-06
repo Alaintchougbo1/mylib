@@ -81,9 +81,9 @@ export default function Navbar() {
                     className="flex items-center gap-3 rounded-full border border-slate-200 bg-white pl-1.5 pr-4 py-1.5 transition-all hover:border-brand-200 hover:bg-slate-50"
                   >
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[10px] font-black uppercase text-slate-600">
-                      {user.username.charAt(0)}
+                      {user.prenom.charAt(0)}
                     </div>
-                    <span className="text-xs font-bold text-slate-950 tracking-tight">{user.username}</span>
+                    <span className="text-xs font-bold text-slate-950 tracking-tight">{user.prenom}</span>
                   </Link>
 
                   <button
@@ -148,10 +148,10 @@ export default function Navbar() {
                 <div className="flex items-center justify-between px-2">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 text-brand-700 font-black">
-                      {user.username.charAt(0)}
+                      {user.prenom.charAt(0)}
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-slate-950">{user.username}</div>
+                      <div className="text-sm font-bold text-slate-950">{user.prenom}</div>
                       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{isAdmin ? "Administrateur" : "Membre"}</div>
                     </div>
                   </div>
